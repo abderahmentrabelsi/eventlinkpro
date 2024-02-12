@@ -1,6 +1,9 @@
 // ** React Imports
 import { useState } from 'react'
 
+import Alert from '@mui/material/Alert';
+
+
 // ** MUI Imports
 import Drawer from '@mui/material/Drawer'
 import Button from '@mui/material/Button'
@@ -116,26 +119,68 @@ const SidebarAddUser = (props: SidebarAddUserType) => {
     mode: 'onChange',
     resolver: yupResolver(schema)
   })
-  const onSubmit = (data: UserData) => {
-    if (store.allData.some((u: UsersType) => u.email === data.email || u.username === data.username)) {
-      store.allData.forEach((u: UsersType) => {
-        if (u.email === data.email) {
-          setError('email', {
-            message: 'Email already exists!'
-          })
+
+  type FormFieldName = "email" | "company" | "billing" | "country" | "contact" | "fullName" | "username";
+
+  const [alert, setAlert] = useState<{ type: 'success' | 'error' | ''; message: string }>({ type: '', message: '' });
+
+  const onSubmit = async (data: UserData) => {
+    try {
+      // Check if the email exists
+      const emailCheckResponse = await fetch('/api/users/checkEmail', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: data.email }),
+      });
+
+      if (emailCheckResponse.ok) {
+        const emailCheck = await emailCheckResponse.json();
+        if (emailCheck.exists) {
+          setError('email', { type: 'manual', message: 'Email already exists!' });
+          return;
         }
-        if (u.username === data.username) {
-          setError('username', {
-            message: 'Username already exists!'
-          })
+      } else {
+        setAlert({ type: 'error', message: 'Failed to check email. Please try again.' });
+        return;
+      }
+
+      // Check if the username exists
+      const usernameCheckResponse = await fetch('/api/users/checkUsername', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username: data.username }),
+      });
+
+      if (usernameCheckResponse.ok) {
+        const usernameCheck = await usernameCheckResponse.json();
+        if (usernameCheck.exists) {
+          setError('username', { type: 'manual', message: 'Username already exists!' });
+          return;
         }
-      })
-    } else {
-      dispatch(addUser({ ...data, role, currentPlan: plan }))
-      toggle()
-      reset()
+      } else {
+        setAlert({ type: 'error', message: 'Failed to check username. Please try again.' });
+        return;
+      }
+
+      // Proceed with adding the user if both email and username do not exist
+      const addUserResponse = await fetch('/api/users/addUser', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ...data, role, currentPlan: plan }),
+      });
+
+      if (addUserResponse.ok) {
+        setAlert({ type: 'success', message: 'User added successfully.' });
+        toggle(); // Close the drawer
+        reset(); // Reset form fields to their initial values
+      } else {
+        const errorData = await addUserResponse.json();
+        setAlert({ type: 'error', message: errorData.error || 'Failed to add user due to server error.' });
+      }
+    } catch (error) {
+      setAlert({ type: 'error', message: 'An unexpected error occurred.' });
     }
-  }
+  };
 
   const handleClose = () => {
     setPlan('basic')
