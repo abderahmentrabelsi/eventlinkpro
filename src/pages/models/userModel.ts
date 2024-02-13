@@ -8,13 +8,13 @@ const userSchema = new mongoose.Schema({
   contact: { type: Number, required: true },
   fullName: { type: String, required: true },
   username: { type: String, required: true, unique: true },
+  password: { type: String, required: false }, // Make password optional
   role: { type: String, required: true },
   currentPlan: { type: String, required: true },
 }, {
-  timestamps: true, // Adds createdAt and updatedAt timestamps
+  timestamps: true,
 });
 
-// Adjusting the model definition to check if it's already compiled
 const User = mongoose.models.User || mongoose.model('User', userSchema);
 
 export default User;

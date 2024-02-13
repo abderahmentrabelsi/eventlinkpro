@@ -282,10 +282,13 @@ const LoginPage = () => {
               </Button>
               <Box sx={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', justifyContent: 'center' }}>
                 <Typography sx={{ color: 'text.secondary', mr: 2 }}>New on our platform?</Typography>
-                <Typography href='/register' component={LinkStyled}>
-                  Create an account
-                </Typography>
+                <Link href='/register' passHref>
+                  <Typography component="a" sx={{color: `${theme.palette.primary.main} !important`, textDecoration: 'none', cursor: 'pointer'}}>
+                    Create an account
+                  </Typography>
+                </Link>
               </Box>
+
               <Divider
                 sx={{
                   color: 'text.disabled',
