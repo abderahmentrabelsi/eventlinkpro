@@ -5,8 +5,8 @@ import type { NextComponentType, NextPageContext } from 'next/dist/shared/lib/ut
 declare module 'next' {
   export declare type NextPage<P = {}, IP = P> = NextComponentType<NextPageContext, IP, P> & {
    // acl?: ACLObj
-    authGuard?: boolean
-    guestGuard?: boolean
+    //authGuard?: boolean
+    //guestGuard?: boolean
     setConfig?: () => void
     contentHeightFixed?: boolean
     getLayout?: (page: ReactElement) => ReactNode
