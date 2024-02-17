@@ -1,11 +1,8 @@
 // ** React Imports
-import { ReactNode, useContext } from 'react'
-
-// ** Component Imports
-import { AbilityContext } from 'src/layouts/components/acl/Can'
+import { ReactNode } from 'react'
 
 // ** Types
-import { NavGroup, NavLink } from 'src/@core/layouts/types'
+import { NavGroup } from 'src/@core/layouts/types'
 
 interface Props {
   navGroup?: NavGroup
@@ -16,15 +13,13 @@ const CanViewNavGroup = (props: Props) => {
   // ** Props
   const { children, navGroup } = props
 
-  // ** Hook
-  const ability = useContext(AbilityContext)
-
-  const checkForVisibleChild = (arr: NavLink[] | NavGroup[]): boolean => {
+  const checkForVisibleChild = (arr: NavGroup[]): boolean => {
     return arr.some((i: NavGroup) => {
       if (i.children) {
         return checkForVisibleChild(i.children)
       } else {
-        return ability?.can(i.action, i.subject)
+        // Assuming every item should be visible if no specific checks are required
+        return true
       }
     })
   }
@@ -32,13 +27,11 @@ const CanViewNavGroup = (props: Props) => {
   const canViewMenuGroup = (item: NavGroup) => {
     const hasAnyVisibleChild = item.children && checkForVisibleChild(item.children)
 
-    if (!(item.action && item.subject)) {
-      return hasAnyVisibleChild
-    }
-
-    return ability && ability.can(item.action, item.subject) && hasAnyVisibleChild
+    // If there are no action and subject properties, rely on child visibility
+    return hasAnyVisibleChild
   }
 
+  // Directly render children if `auth` is explicitly set to false or if the group can be viewed
   if (navGroup && navGroup.auth === false) {
     return <>{children}</>
   } else {

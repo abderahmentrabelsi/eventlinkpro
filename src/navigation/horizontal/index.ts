@@ -131,7 +131,7 @@ const navigation = (): HorizontalNavItemsType => {
           icon: 'tabler:brand-tabler'
         },
         {
-          
+
           title: 'Cards',
           icon: 'tabler:id',
           children: [
@@ -591,8 +591,6 @@ const navigation = (): HorizontalNavItemsType => {
       children: [
         {
           path: '/acl',
-          action: 'read',
-          subject: 'acl-page',
           icon: 'tabler:shield',
           title: 'Access Control'
         },
