@@ -3,6 +3,8 @@ import { useState, ReactNode, MouseEvent } from 'react'
 
 // ** Next Imports
 import Link from 'next/link'
+import { signIn } from 'next-auth/react' // Import signIn from next-auth/react
+
 
 // ** MUI Components
 import Alert from '@mui/material/Alert'
@@ -122,11 +124,27 @@ const LoginPage = () => {
   })
   const router = useRouter() // Using useRouter hook for navigation
 
-  const onSubmit = (event: React.FormEvent) => {
-    event.preventDefault() // Prevent default form submission behavior
-    router.push('/dashboards/analytics/') // Change '/dashboard' to your application's main page route
-  }
+  const onSubmit = async (data: FormData) => {
+    const result = await signIn('credentials', {
+      redirect: false, // This should prevent automatic redirection
+      email: data.email,
+      password: data.password,
+      callbackUrl: `${window.location.origin}/dashboards/analytics`
+    });
 
+    if (result?.error) {
+      // Handle displaying "bad credentials" or other error messages here
+      setError("email", {
+        type: "manual",
+        message: "Bad credentials" // Customize this message as needed
+      });
+    } else if (result?.url) {
+      // If there's a URL to redirect to and no error, redirect manually
+      window.location.href = result.url;
+    }
+    // Prevent default form submission behavior
+    return false;
+  }
   const imageSource = skin === 'bordered' ? 'auth-v2-login-illustration-bordered' : 'auth-v2-login-illustration'
 
   return (
@@ -203,7 +221,7 @@ const LoginPage = () => {
                 Client: <strong>client@vuexy.com</strong> / Pass: <strong>client</strong>
               </Typography>
             </Alert>
-            <form noValidate autoComplete='off' onSubmit={onSubmit}>
+            <form noValidate autoComplete="off" onSubmit={handleSubmit(onSubmit)}> {/* Use handleSubmit from react-hook-form */}
               <Box sx={{ mb: 4 }}>
                 <Controller
                   name='email'
